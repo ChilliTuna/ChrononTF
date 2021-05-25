@@ -10,6 +10,7 @@ public class Core : MonoBehaviour
     public GameObject stoppables;
 
     List<GameObject> stoppableObjects = new List<GameObject>();
+    List<Vector3> velocities = new List<Vector3>();
 
     // Start is called before the first frame update
     void Start()
@@ -17,37 +18,49 @@ public class Core : MonoBehaviour
         foreach(Transform stoppable in stoppables.transform)
         {
             stoppableObjects.Add(stoppable.gameObject);
+            velocities.Add(new Vector3(0, 0, 0));
         }
 
         if (isTimeStopped)
         {
-            ToggleTime(false);
+            SetTimeFlux(false);
         }
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            ToggleTime(!isTimeStopped);
-        }
+
     }
 
     /// <summary> 
-    ///activeness = true ? play time : stop time
+    ///activeness = true ? play time : stop time;
     /// </summary>
     /// <param name="activeness"></param>
-    void ToggleTime(bool activeness)
+    public void SetTimeFlux(bool activeness)
     {
-        foreach (GameObject gameObject in stoppableObjects)
+        for (int i = 0; i < stoppableObjects.Count; i++)
         {
-            Rigidbody rb = gameObject.GetComponent<Rigidbody>();
+            Rigidbody rb = stoppableObjects[i].GetComponent<Rigidbody>();
             if (rb != null)
             {
+                if (activeness == false)
+                {
+                    velocities[i] = rb.velocity;
+                }
+                else
+                {
+                    rb.velocity = velocities[i];
+                }
                 rb.isKinematic = !activeness;
             }
         }
         isTimeStopped = activeness;
+    }
+
+    public void SwapTimeFlux()
+    {
+        SetTimeFlux(!isTimeStopped);
     }
 }
