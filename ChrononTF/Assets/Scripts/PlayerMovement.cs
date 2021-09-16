@@ -6,16 +6,44 @@ using UnityEngine.Events;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 0.1f;
+    public float moveSpeed = 2f;
 
     public UnityEvent OnFPress;
 
     CharacterController charController;
 
+    private Vector3 velocity = new Vector3();
+
+    [Header("In Air Detection")]
+
+    public bool canAirJump;
+
+    public bool isInAir;
+
+    public Vector3 footPos = new Vector3(0, -1, 0);
+    public float footChunkiness = 0.5f;
+
+    public LayerMask inAirCheckLayerMask;
+
     // Start is called before the first frame update
     void Start()
     {
         charController = gameObject.GetComponent<CharacterController>();
+    }
+
+    private void FixedUpdate()
+    {
+        isInAir = Physics.OverlapSphere(footPos, footChunkiness, 1 << inAirCheckLayerMask).Length == 0;
+        if (isInAir)
+        {
+            //velocity += Vector3.down * 9.8f;
+        }
+        else
+        {
+            velocity.y = 0;
+        }
+
+        charController.Move(velocity);
     }
 
     // Update is called once per frame
@@ -26,21 +54,34 @@ public class PlayerMovement : MonoBehaviour
             OnFPress.Invoke();
         }
 
-        if (Input.GetKey(KeyCode.W))
+        charController.Move((transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * moveSpeed * Time.deltaTime);
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            charController.Move(transform.forward * moveSpeed);
+            if (isInAir)
+            {
+                if(canAirJump)
+                {
+                    //Jump
+                }
+            }
+            else
+            {
+                //Jump
+            }
         }
-        if (Input.GetKey(KeyCode.A))
+
+        if (Input.GetKeyDown(KeyCode.K))
         {
-            charController.Move(transform.right * -moveSpeed);
+            charController.Move(new Vector3(0, 3, 0));
         }
-        if (Input.GetKey(KeyCode.S))
-        {
-            charController.Move(transform.forward * -moveSpeed);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            charController.Move(transform.right * moveSpeed);
-        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Color foot = Color.blue;
+        foot.a = 0.4f;
+        Gizmos.color = foot;
+        Gizmos.DrawSphere(transform.position + footPos, footChunkiness);
     }
 }
