@@ -36,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
         isInAir = Physics.OverlapSphere(transform.position + footPos, footChunkiness, 1 << inAirCheckLayerMask).Length == 0;
         if (isInAir)
         {
-            velocity += Vector3.down * 9.8f * Time.deltaTime;
+            velocity += Vector3.down * 9.8f * Time.fixedDeltaTime;
         }
         else
         {
