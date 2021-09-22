@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.K))
         {
-            charController.Move(new Vector3(0, 3, 0));
+            Jump();
         }
     }
 
@@ -83,5 +83,10 @@ public class PlayerMovement : MonoBehaviour
         foot.a = 0.4f;
         Gizmos.color = foot;
         Gizmos.DrawSphere(transform.position + footPos, footChunkiness);
+    }
+
+    private void Jump()
+    {
+        charController.Move(new Vector3(0, 3, 0));
     }
 }
