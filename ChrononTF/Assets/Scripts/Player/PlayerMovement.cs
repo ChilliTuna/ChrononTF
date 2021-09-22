@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
             OnFPress.Invoke();
         }
 
-        charController.Move((transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * moveSpeed * Time.deltaTime);
+        charController.Move((transform.forward * Input.GetAxisRaw("Vertical") + transform.right * Input.GetAxisRaw("Horizontal")).normalized * moveSpeed * Time.deltaTime);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
