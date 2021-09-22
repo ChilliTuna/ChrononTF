@@ -1004,8 +1004,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7901786637661381413, guid: 2eaed7a40a1100d42912c3f3d008ccbb, type: 3}
+      propertyPath: isInAir
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7901786637661381413, guid: 2eaed7a40a1100d42912c3f3d008ccbb, type: 3}
       propertyPath: moveSpeed
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7901786637661381413, guid: 2eaed7a40a1100d42912c3f3d008ccbb, type: 3}
+      propertyPath: inAirCheckLayerMask.m_Bits
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 7901786637661381413, guid: 2eaed7a40a1100d42912c3f3d008ccbb, type: 3}
       propertyPath: OnFPress.m_PersistentCalls.m_Calls.Array.data[0].m_Target
