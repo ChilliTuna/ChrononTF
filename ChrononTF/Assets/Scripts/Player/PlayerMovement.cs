@@ -25,6 +25,11 @@ public class PlayerMovement : MonoBehaviour
 
     public LayerMask inAirCheckLayerMask;
 
+    private void OnEnable()
+    {
+        EnableInput();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
         isInAir = Physics.OverlapSphere(transform.position + footPos, footChunkiness, 1 << inAirCheckLayerMask).Length == 0;
         if (isInAir)
         {
-            velocity += Vector3.down * 9.8f * Time.fixedDeltaTime;
+            velocity += Physics.gravity * Time.fixedDeltaTime;
         }
         else
         {
@@ -88,5 +93,10 @@ public class PlayerMovement : MonoBehaviour
     private void Jump()
     {
         charController.Move(new Vector3(0, 3, 0));
+    }
+
+    private void EnableInput()
+    {
+
     }
 }
