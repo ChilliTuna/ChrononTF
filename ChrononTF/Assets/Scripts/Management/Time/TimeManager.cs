@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeManagement : MonoBehaviour
+public class TimeManager : MonoBehaviour
 {
     public bool isTimeStopped;
     public float stoppedPeriod;

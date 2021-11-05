@@ -1,33 +1,44 @@
+using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class PlayerMovement : MonoBehaviour
 {
+    #region Variables
+
+    [Header("Movement")]
     public float moveSpeed = 2f;
+    public Vector3 controlledMovement = new Vector3();
+    public float jumpHeight = 0.3f;
 
-    public UnityEvent OnFPress;
-
-    private CharacterController charController;
-
+    [Header("Player Specific Physics")]
+    [SerializeField]
     private Vector3 physicsAcceleration = new Vector3();
+
+    [SerializeField]
     private Vector3 physicsVelocity = new Vector3();
+
+    [SerializeField]
     private Vector3 physicsMovement = new Vector3();
 
-    private Vector3 controlledMovement = new Vector3();
+    [SerializeField]
+    private Vector3 personalGravity = new Vector3(0, -9.8f, 0);
 
     [Header("In Air Detection")]
     public bool canAirJump;
+    private bool doGroundChecks = true;
+    private bool isGrounded = true;
+    public Vector3 groundCheckSize = new Vector3(0.25f, 0.1f, 0.25f);
+    public Vector3 groundCheckPos = new Vector3(0, -1, 0);
+    public LayerMask groundCheckIgnoreLayerMask;
 
-    public bool hasLanded;
-
-    private bool hasJumped = false;
-
-    public Vector3 footPos = new Vector3(0, -1, 0);
-    public float footChunkiness = 0.5f;
-
-    public LayerMask inAirCheckLayerMask;
-
+    [Header("Misc")]
     private PlayerInput playerInput;
+    private CharacterController charController;
+    private TimeManager timeManager;
+
+    #endregion Variables
+
+    #region Unity Functions
 
     private void Awake()
     {
@@ -37,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         charController = gameObject.GetComponent<CharacterController>();
+        timeManager = FindObjectOfType<TimeManager>();
     }
 
     private void OnEnable()
@@ -51,14 +63,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (hasJumped)
+        if (doGroundChecks)
         {
-            hasLanded = Physics.OverlapSphere(transform.position + footPos, footChunkiness, 1 << inAirCheckLayerMask).Length != 0;
-            physicsVelocity += physicsAcceleration + Physics.gravity * Time.fixedDeltaTime;
-            if (hasLanded)
+            isGrounded = Physics.OverlapBox(transform.position + groundCheckPos, groundCheckSize, transform.rotation, 1 << groundCheckIgnoreLayerMask).Length != 0;
+            if (isGrounded)
             {
-                hasJumped = false;
                 physicsVelocity.y = 0;
+                physicsMovement.y = 0;
+            }
+            else
+            {
+                physicsVelocity += physicsAcceleration + personalGravity * Time.fixedDeltaTime;
             }
         }
         else
@@ -69,18 +84,10 @@ public class PlayerMovement : MonoBehaviour
         physicsMovement += physicsVelocity * Time.fixedDeltaTime;
 
         charController.Move(physicsMovement);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            OnFPress.Invoke();
-        }
 
         controlledMovement = transform.forward * playerInput.InGame.Move.ReadValue<Vector2>().y + transform.right * playerInput.InGame.Move.ReadValue<Vector2>().x;
 
-        charController.Move(controlledMovement * moveSpeed * Time.deltaTime);
+        charController.Move(controlledMovement * moveSpeed * Time.fixedDeltaTime);
     }
 
     private void OnDrawGizmos()
@@ -88,12 +95,18 @@ public class PlayerMovement : MonoBehaviour
         Color foot = Color.blue;
         foot.a = 0.4f;
         Gizmos.color = foot;
-        Gizmos.DrawSphere(transform.position + footPos, footChunkiness);
+        Gizmos.DrawCube(transform.position + groundCheckPos, groundCheckSize * 2);
     }
+
+    #endregion Unity Functions
+
+    #region Custom Functions
+
+    #region Jumping
 
     private void TryJump()
     {
-        if (hasJumped)
+        if (!isGrounded)
         {
             if (canAirJump)
             {
@@ -110,14 +123,36 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!doAirJump)
         {
-        hasJumped = true;
-        hasLanded = false;
+            doGroundChecks = false;
+            isGrounded = false;
         }
-        charController.Move(new Vector3(0, 3, 0));
+        StartCoroutine(DoJumpMove());
     }
+
+    //private void DoJumpMove()
+    //{
+    //    physicsVelocity.y = Mathf.Sqrt(jumpHeight * -2f * personalGravity.y);
+    //}
+
+    private IEnumerator DoJumpMove()
+    {
+        //u = (s-0.5at^2)/t
+        //float upwardsVelocity = (height - (0.5f * personalGravity.y * Mathf.Pow(timeToPeak, 2))) / timeToPeak;
+        //physicsVelocity.y += upwardsVelocity;
+        physicsVelocity.y = Mathf.Sqrt(jumpHeight * -1f * ( personalGravity.y + physicsAcceleration.y));
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        doGroundChecks = true;
+    }
+
+    #endregion Jumping
+
+    #region Input Functions
 
     private void EnableInput()
     {
+        playerInput.InGame.StopTime.performed += ctx => timeManager.SwapTimeFlux();
+        playerInput.InGame.StopTime.Enable();
         playerInput.InGame.Jump.performed += ctx => TryJump();
         playerInput.InGame.Jump.Enable();
         playerInput.InGame.Move.Enable();
@@ -128,4 +163,8 @@ public class PlayerMovement : MonoBehaviour
         playerInput.InGame.Jump.Disable();
         playerInput.InGame.Move.Disable();
     }
+
+    #endregion Input Functions
+
+    #endregion Custom Functions
 }
