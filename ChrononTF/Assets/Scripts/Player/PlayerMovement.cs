@@ -78,10 +78,10 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            physicsVelocity += physicsAcceleration * Time.fixedDeltaTime;
+            //physicsVelocity += physicsAcceleration * Time.fixedDeltaTime;
         }
 
-        physicsMovement += physicsVelocity * Time.fixedDeltaTime;
+        physicsMovement = physicsVelocity * Time.fixedDeltaTime;
 
         charController.Move(physicsMovement);
 
@@ -139,7 +139,8 @@ public class PlayerMovement : MonoBehaviour
         //u = (s-0.5at^2)/t
         //float upwardsVelocity = (height - (0.5f * personalGravity.y * Mathf.Pow(timeToPeak, 2))) / timeToPeak;
         //physicsVelocity.y += upwardsVelocity;
-        physicsVelocity.y = Mathf.Sqrt(jumpHeight * -1f * ( personalGravity.y + physicsAcceleration.y));
+        //physicsAcceleration.y = 0;
+        physicsVelocity.y = physicsVelocity.y + Mathf.Sqrt(jumpHeight * -1f * ( personalGravity.y + physicsAcceleration.y));
         yield return new WaitForSecondsRealtime(0.1f);
 
         doGroundChecks = true;
